@@ -1,4 +1,4 @@
-// Handles all database initilization, migrations and seeding
+// Handles all database initialization, migrations and seeding
 package database
 
 import (
@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Initilizes a connection to the SQLite database
+// Initializes a connection to the SQLite database
 // It takes the path to the database file as a parameter and returns
 // a GORM database instance or an error if the connection fails
 func Init(dbPath string) (*gorm.DB, error) {

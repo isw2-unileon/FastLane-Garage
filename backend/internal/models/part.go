@@ -11,7 +11,7 @@ type Part struct {
 	Name string `json:"name"`
 
 	// CarZone specifies which zone of the car this part belongs to
-	CaroZone string `json:"car_zone"`
+	CarZone string `json:"car_zone"`
 
 	// ImageURL is the URL to the image of the part for frontend rendering
 	ImageURL string `json:"image_url"`
@@ -20,7 +20,7 @@ type Part struct {
 	Price float64 `json:"price"`
 }
 
-// TabelName specifies the database table name for the Part model
+// TableName specifies the database table name for the Part model
 // GORM uses this method to determinate which table to query
 func (Part) TableName() string {
 	return "parts"
