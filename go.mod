@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/gin-gonic/gin v1.10.0
 	gorm.io/driver/sqlite v1.5.5
-	gorm.io/gorm v1.25.6
+	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
 )
 
 require (
