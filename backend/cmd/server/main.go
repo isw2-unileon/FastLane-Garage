@@ -15,6 +15,8 @@ import (
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/config"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/database"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/handlers"
+	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/repository"
+	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/service"
 )
 
 // logger is a structured logger instance used throughout the application.
@@ -80,10 +82,32 @@ func main() {
 	// Create an API route group with the "/api" prefix.
 	// All routes defined within this group will be accessible at "/api/*".
 	api := r.Group("/api")
-	// Register the GET /api/parts endpoint.
-	// This endpoint retrieves all automobile parts from the database
-	// for the frontend to display in the interactive SVG.
-	api.GET("/parts", handlers.GetParts(db))
+
+	// Initialize the parts repository with the database connection.
+	// The repository is responsible for all database operations related to parts.
+	partsRepo := repository.NewPartsRepository(db)
+
+	// Initialize the parts service with the repository.
+	// The service contains the business logic for parts operations.
+	partsSvc := service.NewPartsService(partsRepo)
+
+	// Register all CRUD endpoints for parts.
+	// Each handler is registered with the HTTP method and route path.
+
+	// GET /api/parts - Retrieve all parts.
+	api.GET("/parts", handlers.GetParts(partsSvc))
+
+	// GET /api/parts/:id - Retrieve a single part by ID.
+	api.GET("/parts/:id", handlers.GetPartByID(partsSvc))
+
+	// POST /api/parts - Create a new part.
+	api.POST("/parts", handlers.CreatePart(partsSvc))
+
+	// PUT /api/parts/:id - Update an existing part.
+	api.PUT("/parts/:id", handlers.UpdatePart(partsSvc))
+
+	// DELETE /api/parts/:id - Delete a part by ID.
+	api.DELETE("/parts/:id", handlers.DeletePart(partsSvc))
 
 	// Register the GET /api/hello endpoint.
 	// This is a sample endpoint for testing the API is working.
