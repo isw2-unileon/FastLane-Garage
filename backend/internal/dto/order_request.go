@@ -10,7 +10,7 @@ type OrderItemRequest struct {
 	Quantity int `json:"quantity" binding:"required,gt=0,max=1000"`
 }
 
-// CreatedOrderRequest represents the request payload for creating a new order.
+// CreateOrderRequest represents the request payload for creating a new order.
 type CreateOrderRequest struct {
 	// CustomerName is the name of the customer placing the order.
 	CustomerName string `json:"customer_name" binding:"required,min=1,max=100"`

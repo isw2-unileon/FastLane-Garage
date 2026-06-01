@@ -12,12 +12,12 @@ import (
 
 // parseID extracts and validates an ID from URL parameters.
 // Returns the parsed ID or an error response if invalid.
-func parseID(c *gin.Context, paramName string) (uint, bool) {
-	idParam := c.Param(paramName)
+func parseID(c *gin.Context) (uint, bool) {
+	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid " + paramName + " ID format",
+			"error": "invalid id format",
 		})
 		return 0, false
 	}

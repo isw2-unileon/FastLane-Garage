@@ -54,7 +54,7 @@ func (r *ordersRepositoryImpl) FindAll() ([]models.Order, error) {
 		return nil, fmt.Errorf("failed to fetch orders: %w", err)
 	}
 
-	// Return empty slice instead of nil for JSON consitency.
+	// Return empty slice instead of nil for JSON consistency.
 	if orders == nil {
 		orders = []models.Order{}
 	}
