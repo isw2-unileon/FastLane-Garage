@@ -33,7 +33,7 @@ func GetParts(svc service.PartsService) gin.HandlerFunc {
 func GetPartByID(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and validate the part ID from the URL path.
-		id, ok := parseID(c, "id")
+		id, ok := parseID(c)
 		if !ok {
 			return
 		}
@@ -90,7 +90,7 @@ func CreatePart(svc service.PartsService) gin.HandlerFunc {
 func UpdatePart(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and validate the part ID from the URL path.
-		id, ok := parseID(c, "id")
+		id, ok := parseID(c)
 		if !ok {
 			return
 		}
@@ -128,7 +128,7 @@ func UpdatePart(svc service.PartsService) gin.HandlerFunc {
 func DeletePart(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and validate the part ID from the URL path.
-		id, ok := parseID(c, "id")
+		id, ok := parseID(c)
 		if !ok {
 			return
 		}

@@ -33,7 +33,7 @@ func GetOrders(svc service.OrdersService) gin.HandlerFunc {
 func GetOrderByID(svc service.OrdersService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and validate the order ID from the URL path.
-		id, ok := parseID(c, "id")
+		id, ok := parseID(c)
 		if !ok {
 			return
 		}
@@ -89,7 +89,7 @@ func CreateOrder(svc service.OrdersService, partsRepo repository.PartsRepository
 func UpdateOrderStatus(svc service.OrdersService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and validate the order ID from the URL path.
-		id, ok := parseID(c, "id")
+		id, ok := parseID(c)
 		if !ok {
 			return
 		}
@@ -127,7 +127,7 @@ func UpdateOrderStatus(svc service.OrdersService) gin.HandlerFunc {
 func DeleteOrder(svc service.OrdersService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Extract and validate the order ID from the URL path.
-		id, ok := parseID(c, "id")
+		id, ok := parseID(c)
 		if !ok {
 			return
 		}

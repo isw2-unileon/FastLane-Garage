@@ -24,7 +24,7 @@ type CreateOrderRequest struct {
 
 // UpdateOrderStatusRequest represents the request payload for updating an order's status.
 type UpdateOrderStatusRequest struct {
-	// Status is the new status fot the order.
+	// Status is the new status for the order.
 	// Valid values: pending, processing, completed or cancelled.
 	Status string `json:"status" binding:"required,oneof=pending processing completed cancelled"`
 }
@@ -43,7 +43,7 @@ type OrderItemResponse struct {
 	// Quantity is the number of parts ordered.
 	Quantity int `json:"quantity"`
 
-	// UnitPrice is the price of a single part at the time or ordering.
+	// UnitPrice is the price of a single part at the time of ordering.
 	UnitPrice float64 `json:"unit_price"`
 
 	// Part contains the part details.
@@ -74,5 +74,5 @@ type OrderResponse struct {
 	UpdatedAt string `json:"updated_at"`
 
 	// OrderItems contains all items in the order.
-	OrderItems []OrderItemResponse `json:"order_item,omitempty"`
+	OrderItems []OrderItemResponse `json:"order_items,omitempty"`
 }

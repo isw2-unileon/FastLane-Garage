@@ -44,7 +44,7 @@ func NewOrdersRepository(db *gorm.DB) OrdersRepository {
 	}
 }
 
-// FindAll retrieves all orders from the database with their assciated items.
+// FindAll retrieves all orders from the database with their associated items.
 // Returns an empty slice if no orders are found (not an error).
 func (r *ordersRepositoryImpl) FindAll() ([]models.Order, error) {
 	var orders []models.Order

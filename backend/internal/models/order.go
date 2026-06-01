@@ -24,7 +24,7 @@ const (
 // Order represents a customer order in the system.
 // It maps to the "orders" table in the SQLite database.
 type Order struct {
-	// ID is the unique identifier for the order (primary kay).
+	// ID is the unique identifier for the order (primary key).
 	ID uint `gorm:"primaryKey" json:"id"`
 
 	// CustomerName is the name of the customer who placed the order.

@@ -127,7 +127,7 @@ func main() {
 	api.POST("/orders", handlers.CreateOrder(ordersSvc, partsRepo))
 
 	// PUT /api/orders/:status - Update an order's status.
-	api.PUT("/orders/:status", handlers.UpdateOrderStatus(ordersSvc))
+	api.PUT("/orders/:id/status", handlers.UpdateOrderStatus(ordersSvc))
 
 	// DELETE /api/orders/:id - Delete an order by ID.
 	api.DELETE("/orders/:id", handlers.DeleteOrder(ordersSvc))
