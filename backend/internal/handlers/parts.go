@@ -2,34 +2,26 @@
 package handlers
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/dto"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/service"
-	"gorm.io/gorm"
 )
 
 // GetParts returns a Gin handler function that fetches all parts from the database.
 // It accepts a PartsService and returns a handler that can be registered
 // to a Gin route. This pattern (handler factory) allows dependency injection of the service.
 func GetParts(svc service.PartsService) gin.HandlerFunc {
-	// Return the actual handler function that will be called for each HTTP request.
 	return func(c *gin.Context) {
 		// Call the service to get all parts.
 		parts, err := svc.GetAllParts()
 		if err != nil {
-			// If an error occurs, respond with HTTP 500 Internal Server Error.
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to fetch parts",
-			})
+			handleInternalError(c, "failed to fetch parts")
 			return
 		}
 
 		// Return the parts as JSON with HTTP 200 OK status.
-		// The response format wraps parts in a "data" field for API consistency.
 		c.JSON(http.StatusOK, gin.H{
 			"data": parts,
 		})
@@ -40,35 +32,21 @@ func GetParts(svc service.PartsService) gin.HandlerFunc {
 // The part ID is extracted from the URL path parameter (e.g., /api/parts/1).
 func GetPartByID(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract the part ID from the URL path.
-		idParam := c.Param("id")
-
-		// Convert the ID string to an unsigned integer.
-		id, err := strconv.ParseUint(idParam, 10, 32)
-		if err != nil {
-			// If the ID is not a valid number, return HTTP 400 Bad Request.
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid part ID format",
-			})
+		// Extract and validate the part ID from the URL path.
+		id, ok := parseID(c, "id")
+		if !ok {
 			return
 		}
 
 		// Call the service to get the part by ID.
-		part, err := svc.GetPartByID(uint(id))
+		part, err := svc.GetPartByID(id)
 		if err != nil {
 			// Check if the error is "record not found".
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// If the part is not found, return HTTP 404 Not Found.
-				c.JSON(http.StatusNotFound, gin.H{
-					"error": "part not found",
-				})
+			if handleNotFoundError(c, err, "part") {
 				return
 			}
 
-			// For other errors, return HTTP 500 Internal Server Error.
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "failed to fetch part",
-			})
+			handleInternalError(c, "failed to fetch part")
 			return
 		}
 
@@ -86,10 +64,7 @@ func CreatePart(svc service.PartsService) gin.HandlerFunc {
 		// Parse and validate the request body.
 		var req dto.CreatePartRequest
 
-		// BindJSON parses the JSON and validates it using the binding tags defined in the DTO.
 		if err := c.BindJSON(&req); err != nil {
-			// If binding fails (invalid JSON or validation error),
-			// return HTTP 400 Bad Request with the error message.
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
@@ -99,15 +74,11 @@ func CreatePart(svc service.PartsService) gin.HandlerFunc {
 		// Call the service to create the part.
 		part, err := svc.CreatePart(&req)
 		if err != nil {
-			// If service returns an error, return HTTP 500 Internal Server Error.
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			handleInternalError(c, err.Error())
 			return
 		}
 
 		// Return the created part with HTTP 201 Created status.
-		// HTTP 201 indicates that a new resource has been created.
 		c.JSON(http.StatusCreated, gin.H{
 			"data": part,
 		})
@@ -118,25 +89,16 @@ func CreatePart(svc service.PartsService) gin.HandlerFunc {
 // The part ID is extracted from the URL path, and the new data is in the request body.
 func UpdatePart(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract the part ID from the URL path.
-		idParam := c.Param("id")
-
-		// Convert the ID string to an unsigned integer.
-		id, err := strconv.ParseUint(idParam, 10, 32)
-		if err != nil {
-			// If the ID is not a valid number, return HTTP 400 Bad Request.
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid part ID format",
-			})
+		// Extract and validate the part ID from the URL path.
+		id, ok := parseID(c, "id")
+		if !ok {
 			return
 		}
 
 		// Parse and validate the request body.
 		var req dto.UpdatePartRequest
 
-		// BindJSON parses the JSON and validates it using the binding tags.
 		if err := c.BindJSON(&req); err != nil {
-			// If binding fails, return HTTP 400 Bad Request.
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
@@ -144,21 +106,13 @@ func UpdatePart(svc service.PartsService) gin.HandlerFunc {
 		}
 
 		// Call the service to update the part.
-		part, err := svc.UpdatePart(uint(id), &req)
+		part, err := svc.UpdatePart(id, &req)
 		if err != nil {
-			// Check for specific error types.
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// If the part is not found, return HTTP 404 Not Found.
-				c.JSON(http.StatusNotFound, gin.H{
-					"error": "part not found",
-				})
+			if handleNotFoundError(c, err, "part") {
 				return
 			}
 
-			// For other errors, return HTTP 500 Internal Server Error.
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			handleInternalError(c, err.Error())
 			return
 		}
 
@@ -173,39 +127,23 @@ func UpdatePart(svc service.PartsService) gin.HandlerFunc {
 // The part ID is extracted from the URL path parameter.
 func DeletePart(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Extract the part ID from the URL path.
-		idParam := c.Param("id")
-
-		// Convert the ID string to an unsigned integer.
-		id, err := strconv.ParseUint(idParam, 10, 32)
-		if err != nil {
-			// If the ID is not a valid number, return HTTP 400 Bad Request.
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid part ID format",
-			})
+		// Extract and validate the part ID from the URL path.
+		id, ok := parseID(c, "id")
+		if !ok {
 			return
 		}
 
 		// Call the service to delete the part.
-		if err := svc.DeletePart(uint(id)); err != nil {
-			// Check if the error is "record not found".
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				// If the part is not found, return HTTP 404 Not Found.
-				c.JSON(http.StatusNotFound, gin.H{
-					"error": "part not found",
-				})
+		if err := svc.DeletePart(id); err != nil {
+			if handleNotFoundError(c, err, "part") {
 				return
 			}
 
-			// For other errors, return HTTP 500 Internal Server Error.
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			handleInternalError(c, "failed to delete part")
 			return
 		}
 
 		// Return HTTP 204 No Content for successful deletion.
-		// HTTP 204 indicates success but no content to return.
 		c.Status(http.StatusNoContent)
 	}
 }

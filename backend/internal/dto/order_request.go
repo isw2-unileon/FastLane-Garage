@@ -13,7 +13,7 @@ type OrderItemRequest struct {
 // CreatedOrderRequest represents the request payload for creating a new order.
 type CreateOrderRequest struct {
 	// CustomerName is the name of the customer placing the order.
-	CustomerName string `json:"customer_name" binding:"required,min=1,max=100`
+	CustomerName string `json:"customer_name" binding:"required,min=1,max=100"`
 
 	// CustomerEmail is the email address of the customer.
 	CustomerEmail string `json:"customer_email" binding:"required,email"`
