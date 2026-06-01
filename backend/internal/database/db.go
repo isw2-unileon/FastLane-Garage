@@ -28,9 +28,13 @@ func Init(dbPath string) (*gorm.DB, error) {
 // Migrate runs AutoMigrate for all models to create or update database tables.
 // This function should be called once during application startup.
 func Migrate(db *gorm.DB) error {
-	// AutoMigrate creates the "parts" table if it doesn't exist
-	// and synchronizes the schema with the Part struct.
-	if err := db.AutoMigrate(&models.Part{}); err != nil {
+	// AutoMigrate creates tables for all models if they don't exist
+	// and synchronizes the schema with the struct definitions.
+	if err := db.AutoMigrate(
+		&models.Part{},
+		&models.Order{},
+		&models.OrderItem{},
+	); err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
 

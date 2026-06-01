@@ -91,9 +91,16 @@ func main() {
 	// The service contains the business logic for parts operations.
 	partsSvc := service.NewPartsService(partsRepo)
 
+	// Initialize the orders repository with the database connection.
+	ordersRepo := repository.NewOrdersRepository(db)
+
+	// Initialize the orders service with the repository.
+	ordersSvc := service.NewOrdersService(ordersRepo)
+
 	// Register all CRUD endpoints for parts.
 	// Each handler is registered with the HTTP method and route path.
 
+	// ==================== PARTS ENDPOINTS ====================
 	// GET /api/parts - Retrieve all parts.
 	api.GET("/parts", handlers.GetParts(partsSvc))
 
@@ -109,6 +116,23 @@ func main() {
 	// DELETE /api/parts/:id - Delete a part by ID.
 	api.DELETE("/parts/:id", handlers.DeletePart(partsSvc))
 
+	// ==================== ORDERS ENDPOINTS ====================
+	// GET /api/orders - Retrieve all orders.
+	api.GET("/orders", handlers.GetOrders(ordersSvc))
+
+	// GET /api/orders/:id - Retrieve a single order by ID.
+	api.GET("/orders/:id", handlers.GetOrderByID(ordersSvc))
+
+	// POST /api/orders- Create a new order.
+	api.POST("/orders", handlers.CreateOrder(ordersSvc, partsRepo))
+
+	// PUT /api/orders/:status - Update an order's status.
+	api.PUT("/orders/:status", handlers.UpdateOrderStatus(ordersSvc))
+
+	// DELETE /api/orders/:id - Delete an order by ID.
+	api.DELETE("/orders/:id", handlers.DeleteOrder(ordersSvc))
+
+	// ==================== SAMPLE ENDPOINTS ====================
 	// Register the GET /api/hello endpoint.
 	// This is a sample endpoint for testing the API is working.
 	api.GET("/hello", func(c *gin.Context) {
