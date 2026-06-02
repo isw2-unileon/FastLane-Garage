@@ -26,7 +26,7 @@ func NewMockPartsRepository() *mockPartsRepository {
 }
 
 // FindAll returns all parts from the mock repository.
-func (m *mockPartsRepository) FindAll() ([]models.Part, error) {
+func (m *mockPartsRepository) FindAll(zone string, name string) ([]models.Part, error) {
 	parts := make([]models.Part, 0, len(m.parts))
 	for _, p := range m.parts {
 		parts = append(parts, *p)
@@ -109,7 +109,7 @@ func TestGetAllParts(t *testing.T) {
 	svc := NewPartsService(mockRepo)
 
 	// Act: Call the service method.
-	parts, err := svc.GetAllParts()
+	parts, err := svc.GetAllParts("", "")
 	// Assert: Verify the results.
 	if err != nil {
 		t.Fatalf("expected no error, got %v", err)

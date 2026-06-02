@@ -14,8 +14,12 @@ import (
 // It accepts an OrdersService and returns a handler that can be registered to a Gin route.
 func GetOrders(svc service.OrdersService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Extract optional query parameters for filtering.
+		status := c.Query("status")
+		email := c.Query("email")
+
 		// Call the service to get all orders.
-		orders, err := svc.GetAllOrders()
+		orders, err := svc.GetAllOrders(status, email)
 		if err != nil {
 			handleInternalError(c, "failed to fetch orders")
 			return

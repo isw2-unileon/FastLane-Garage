@@ -16,7 +16,7 @@ var ErrNotFound = errors.New("entity not found")
 // Using an interface allows us to mock the repository in tests.
 type PartsRepository interface {
 	// FindAll retrieves all parts form the database.
-	FindAll() ([]models.Part, error)
+	FindAll(zone string, name string) ([]models.Part, error)
 
 	// FindByID retrieves a single part by its ID.
 	// Returns an error if the part is not found.
@@ -50,12 +50,25 @@ func NewPartsRepository(db *gorm.DB) PartsRepository {
 
 // FindAll retrieves all parts from the database.
 // Returns an empty slice if no parts are found (not an error).
-func (r *partsRepositoryImpl) FindAll() ([]models.Part, error) {
+func (r *partsRepositoryImpl) FindAll(zone string, name string) ([]models.Part, error) {
 	var parts []models.Part
 
-	// Query all parts from the database.
-	if err := r.db.Find(&parts).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch all parts: %w", err)
+	// Build query with optional filters.
+	query := r.db
+
+	// Filters by zone if provided.
+	if zone != "" {
+		query = query.Where("car_zone = ?", zone)
+	}
+
+	// Search by name if provided (case-insensitive).
+	if name != "" {
+		query = query.Where("LOWER(name) LIKE LOWER(?)", "%"+name+"%")
+	}
+
+	// Execute the query.
+	if err := query.Find(&parts).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch parts: %w", err)
 	}
 
 	// Return empty slice instead of nil for JSON consistency.
