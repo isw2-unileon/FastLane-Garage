@@ -14,8 +14,12 @@ import (
 // to a Gin route. This pattern (handler factory) allows dependency injection of the service.
 func GetParts(svc service.PartsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Extract optional query parameters for filtering.
+		zone := c.Query("zone")
+		name := c.Query("name")
+
 		// Call the service to get all parts.
-		parts, err := svc.GetAllParts()
+		parts, err := svc.GetAllParts(zone, name)
 		if err != nil {
 			handleInternalError(c, "failed to fetch parts")
 			return

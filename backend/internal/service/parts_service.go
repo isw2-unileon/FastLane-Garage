@@ -13,7 +13,7 @@ import (
 // This abstraction allows us to mock the service in tests.
 type PartsService interface {
 	// GetAllParts retrieves all parts from the repository.
-	GetAllParts() ([]dto.PartResponse, error)
+	GetAllParts(zone string, name string) ([]dto.PartResponse, error)
 
 	// GetPartByID retrieves a single part by its ID.
 	GetPartByID(id uint) (*dto.PartResponse, error)
@@ -43,9 +43,9 @@ func NewPartsService(repo repository.PartsRepository) PartsService {
 
 // GetAllParts retrieves all parts and converts them to DTOs.
 // DTOs are used for responses to ensure a consistent API contract.
-func (s *partsServiceImpl) GetAllParts() ([]dto.PartResponse, error) {
+func (s *partsServiceImpl) GetAllParts(zone string, name string) ([]dto.PartResponse, error) {
 	// Fetch all parts from the repository.
-	parts, err := s.repo.FindAll()
+	parts, err := s.repo.FindAll(zone, name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all parts: %w", err)
 	}

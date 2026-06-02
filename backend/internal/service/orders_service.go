@@ -14,7 +14,7 @@ import (
 // This abstraction allows us to mock the service in tests.
 type OrdersService interface {
 	// GetAllOrders retrieves all orders from the repository.
-	GetAllOrders() ([]dto.OrderResponse, error)
+	GetAllOrders(status string, email string) ([]dto.OrderResponse, error)
 
 	// GetOrderByID retrieves a single order by its ID.
 	GetOrderByID(id uint) (*dto.OrderResponse, error)
@@ -43,16 +43,30 @@ func NewOrdersService(repo repository.OrdersRepository) OrdersService {
 }
 
 // GetAllOrders retrieves all orders and converts them to DTOs.
-func (s *ordersServiceImpl) GetAllOrders() ([]dto.OrderResponse, error) {
+func (s *ordersServiceImpl) GetAllOrders(status string, email string) ([]dto.OrderResponse, error) {
 	// Fetch all orders from the repository.
-	orders, err := s.repo.FindAll()
+	orders, err := s.repo.FindAll(status, email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all orders: %w", err)
 	}
 
+	// Apply filters in the service layer if needed.
+	var filtered []models.Order
+	for _, order := range orders {
+		// Filter by status if provided.
+		if status != "" && order.Status != models.OrderStatus(status) {
+			continue
+		}
+		// Filter by email if provided.
+		if email != "" && order.CustomerEmail != email {
+			continue
+		}
+		filtered = append(filtered, order)
+	}
+
 	// Convert Order models to OrderResponse DTOs.
-	responses := make([]dto.OrderResponse, len(orders))
-	for i, order := range orders {
+	responses := make([]dto.OrderResponse, len(filtered))
+	for i, order := range filtered {
 		responses[i] = s.orderToResponse(&order)
 	}
 

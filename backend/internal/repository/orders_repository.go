@@ -13,7 +13,7 @@ import (
 // Using an interface allows us to mock the repository in tests.
 type OrdersRepository interface {
 	// FindAll retrieves all orders form the database.
-	FindAll() ([]models.Order, error)
+	FindAll(status string, email string) ([]models.Order, error)
 
 	// FindByID retrieves a single order by its ID.
 	// Returns an error if the order is not found.
@@ -46,7 +46,7 @@ func NewOrdersRepository(db *gorm.DB) OrdersRepository {
 
 // FindAll retrieves all orders from the database with their associated items.
 // Returns an empty slice if no orders are found (not an error).
-func (r *ordersRepositoryImpl) FindAll() ([]models.Order, error) {
+func (r *ordersRepositoryImpl) FindAll(status string, email string) ([]models.Order, error) {
 	var orders []models.Order
 
 	// Query all orders and preload their order items and parts.
