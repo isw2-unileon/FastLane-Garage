@@ -114,18 +114,24 @@ func TestGetAllOrders(t *testing.T) {
 func TestGetAllOrdersWithStatusFilter(t *testing.T) {
 	// Arrange: Set up the mock repository with multiple orders.
 	mockRepo := NewMockOrdersRepository()
-	mockRepo.Create(&models.Order{
+	_, err := mockRepo.Create(&models.Order{
 		CustomerName:  "Juan García",
 		CustomerEmail: "juan@example.com",
 		Status:        models.OrderStatusPending,
 		TotalPrice:    2500.00,
 	})
-	mockRepo.Create(&models.Order{
-		CustomerName:  "María López",
+	if err != nil {
+		t.Fatalf("failed to create order: %v", err)
+	}
+	_, err = mockRepo.Create(&models.Order{
+		CustomerName:  "Maria Lopez",
 		CustomerEmail: "maria@example.com",
 		Status:        models.OrderStatusCompleted,
 		TotalPrice:    1200.00,
 	})
+	if err != nil {
+		t.Fatalf("failed to create order: %v", err)
+	}
 
 	svc := NewOrdersService(mockRepo)
 
