@@ -128,7 +128,7 @@ func (s *chatServiceImpl) SendMessage(sessionID uint, req *dto.SendChatMessageRe
 
 	// 3. Prepare the payload for n8n.
 	payload := n8nRequest{
-		SessionID: strconv.Itoa(int(sessionID)),
+		SessionID: strconv.FormatUint(uint64(sessionID), 10),
 		Message:   req.Text,
 	}
 	payload.Vehicle.Brand = session.VehicleBrand

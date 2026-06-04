@@ -9,7 +9,7 @@ import (
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/service"
 )
 
-// GetTopPartsStats
+// GetTopPartsStats handles the HTTP request to retrieve the most ordered parts statistics.
 func GetTopPartsStats(ordersSvc service.OrdersService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		limitStr := c.DefaultQuery("limit", "5")
