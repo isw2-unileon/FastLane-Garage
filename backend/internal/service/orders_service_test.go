@@ -2,6 +2,7 @@
 package service
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/dto"
@@ -15,6 +16,9 @@ type mockOrdersRepository struct {
 	orders map[uint]*models.Order
 	// nextID tracks the next ID to assign to new orders.
 	nextID uint
+
+	// MockGetTopParts allows inyect custom behavior for GetTopParts in tests.
+	MockGetTopParts func(limit int) ([]dto.TopPartResponse, error)
 }
 
 // NewMockOrdersRepository creates a new mock repository with initial test data.
@@ -68,6 +72,14 @@ func (m *mockOrdersRepository) Delete(id uint) error {
 	}
 	delete(m.orders, id)
 	return nil
+}
+
+// mockPartsRepository is a mock implementation of PartsRepository for testing.
+func (m *mockOrdersRepository) GetTopParts(limit int) ([]dto.TopPartResponse, error) {
+	if m.MockGetTopParts != nil {
+		return m.MockGetTopParts(limit)
+	}
+	return nil, nil
 }
 
 // TestGetAllOrders tests the GetAllOrders service method.
@@ -376,5 +388,75 @@ func TestDeleteNonexistentOrder(t *testing.T) {
 	// Assert: Verify that an error was returned.
 	if err == nil {
 		t.Fatal("expected an error when deleting non-existent order, but got none")
+	}
+}
+
+func TestOrdersService_GetTopPartsStats(t *testing.T) {
+	tests := []struct {
+		name          string
+		limitInput    int
+		expectedLimit int
+		mockReturn    []dto.TopPartResponse
+		mockErr       error
+		expectError   bool
+	}{
+		{
+			name:          "Éxito con límite explícito",
+			limitInput:    3,
+			expectedLimit: 3,
+			mockReturn: []dto.TopPartResponse{
+				{PartID: 1, PartName: "Motor V6", TotalOrdered: 10},
+				{PartID: 2, PartName: "Turbo", TotalOrdered: 5},
+				{PartID: 3, PartName: "Discos de freno", TotalOrdered: 2},
+			},
+			mockErr:     nil,
+			expectError: false,
+		},
+		{
+			name:          "Éxito con fallback a límite por defecto (5)",
+			limitInput:    0,
+			expectedLimit: 5,
+			mockReturn:    []dto.TopPartResponse{{PartID: 1, PartName: "Motor V8", TotalOrdered: 10}},
+			mockErr:       nil,
+			expectError:   false,
+		},
+		{
+			name:          "Fallo en el repositorio",
+			limitInput:    5,
+			expectedLimit: 5,
+			mockReturn:    nil,
+			mockErr:       fmt.Errorf("database error"),
+			expectError:   true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockRepo := &mockOrdersRepository{
+				MockGetTopParts: func(limit int) ([]dto.TopPartResponse, error) {
+					if limit != tt.expectedLimit {
+						t.Errorf("se esperaba el límite %d, pero se recibió %d", tt.expectedLimit, limit)
+					}
+					return tt.mockReturn, tt.mockErr
+				},
+			}
+
+			svc := NewOrdersService(mockRepo)
+
+			result, err := svc.GetTopPartsStats(tt.limitInput)
+
+			if tt.expectError {
+				if err == nil {
+					t.Error("se esperaba un error pero no ocurrió ninguno")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("no se esperaba error, se obtuvo: %v", err)
+				}
+				if len(result) != len(tt.mockReturn) {
+					t.Errorf("se esperaban %d resultados, se obtuvieron %d", len(tt.mockReturn), len(result))
+				}
+			}
+		})
 	}
 }

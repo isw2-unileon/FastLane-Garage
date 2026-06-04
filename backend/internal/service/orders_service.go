@@ -27,6 +27,9 @@ type OrdersService interface {
 
 	// DeleteOrder removes an order by ID.
 	DeleteOrder(id uint) error
+
+	// GetTopPartsStats retrieves stadistics about the most ordered parts.
+	GetTopPartsStats(limit int) ([]dto.TopPartResponse, error)
 }
 
 // ordersServiceImpl is the concrete implementation of OrdersService.
@@ -221,4 +224,12 @@ func (s *ordersServiceImpl) orderItemToResponse(item *models.OrderItem) dto.Orde
 	}
 
 	return response
+}
+
+// GetTopPartsStats
+func (s *ordersServiceImpl) GetTopPartsStats(limit int) ([]dto.TopPartResponse, error) {
+	if limit <= 0 {
+		limit = 5
+	}
+	return s.repo.GetTopParts(limit)
 }

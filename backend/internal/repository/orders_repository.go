@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/dto"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/models"
 	"gorm.io/gorm"
 )
@@ -29,6 +30,9 @@ type OrdersRepository interface {
 	// Delete removes an order form the database by ID.
 	// Returns an error if the order does not exist.
 	Delete(id uint) error
+
+	// GetTopParts return the top parts ordered by quantity.
+	GetTopParts(limit int) ([]dto.TopPartResponse, error)
 }
 
 // ordersRepositoryImpl is the concrete implementation of OrdersRepository using GORM.
@@ -121,4 +125,28 @@ func (r *ordersRepositoryImpl) Delete(id uint) error {
 	}
 
 	return nil
+}
+
+// GetTopParts
+func (r *ordersRepositoryImpl) GetTopParts(limit int) ([]dto.TopPartResponse, error) {
+	var results []dto.TopPartResponse
+
+	err := r.db.Table("order_items").
+		Select("parts.id as part_id, parts.name as part_name, parts.car_zone, SUM(order_items.quantity) as total_ordered").
+		Joins("JOIN parts ON parts.id = order_items.part_id").
+		Joins("JOIN orders ON orders.id = order_items.order_id").
+		Where("orders.status != ?", models.OrderStatusCancelled).
+		Group("parts.id, parts.name, parts.car_zone").
+		Order("total_ordered DESC").
+		Limit(limit).
+		Scan(&results).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch top parts stats: %w", err)
+	}
+
+	if results == nil {
+		results = []dto.TopPartResponse{}
+	}
+
+	return results, nil
 }
