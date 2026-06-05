@@ -17,7 +17,7 @@ import (
 // ChatService defines the interface for chat business operations.
 type ChatService interface {
 	// CreateSession initializes a new chat with optional vehicle context.
-	CreateSession(req *dto.CreateChatSessionsRequest) (*dto.ChatSessionResponse, error)
+	CreateSession(req *dto.CreateChatSessionRequest) (*dto.ChatSessionResponse, error)
 
 	// GetSessionHistory retrieves a session and its full message history.
 	GetSessionHistory(sessionID uint) (*dto.ChatSessionResponse, error)
@@ -76,7 +76,7 @@ func NewChatService(repo repository.ChatRepository, n8nURL string) ChatService {
 }
 
 // CreateSession initializes a new chat session in the database.
-func (s *chatServiceImpl) CreateSession(req *dto.CreateChatSessionsRequest) (*dto.ChatSessionResponse, error) {
+func (s *chatServiceImpl) CreateSession(req *dto.CreateChatSessionRequest) (*dto.ChatSessionResponse, error) {
 	partsJSON := "[]"
 	if len(req.Parts) > 0 {
 		bytes, err := json.Marshal(req.Parts)
