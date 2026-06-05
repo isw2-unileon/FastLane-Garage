@@ -31,6 +31,8 @@ var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 // 4. Seed the database with sample data
 // 5. Configure and start the HTTP server
 // 6. Handle graceful shutdown on interrupt signals.
+//
+//nolint:funlen // main is naturally long due to dependency injection and route setup
 func main() {
 	// Create a background context for use during initialization.
 	ctx := context.Background()
