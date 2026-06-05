@@ -4,7 +4,7 @@ A complete full-stack application for managing automotive parts and customer ord
 
 ## 🎯 Features
 
-### Backend (Gon + Gin + GORM)
+### Backend (Go + Gin + GORM)
 
 ✅ **Parts Management**
 
