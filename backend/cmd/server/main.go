@@ -97,6 +97,12 @@ func main() {
 	// Initialize the orders service with the repository.
 	ordersSvc := service.NewOrdersService(ordersRepo)
 
+	// Initialize the chat repository with the database connection.
+	chatRepo := repository.NewChatRepository(db)
+
+	// Initialize the chat service with the repository.
+	chatSvc := service.NewChatService(chatRepo, cfg.N8NWebhookURL)
+
 	// Register all CRUD endpoints for parts.
 	// Each handler is registered with the HTTP method and route path.
 
@@ -131,6 +137,16 @@ func main() {
 
 	// DELETE /api/orders/:id - Delete an order by ID.
 	api.DELETE("/orders/:id", handlers.DeleteOrder(ordersSvc))
+
+	// ==================== CHAT ENDPOINTS ====================
+	// POST /api/chat/sessions - Create a new session.
+	api.POST("/chat/sessions", handlers.CreateChatSession(chatSvc))
+
+	// GET /api/chat/sessions/:id - Get session history.
+	api.GET("/chat/sessions/:id", handlers.GetChatSessionHistory(chatSvc))
+
+	// POST /api/chat/sessions/:id/messages - Send a message to n8n.
+	api.POST("/chat/sessions/:id/messages", handlers.SendChatMessage(chatSvc))
 
 	// ==================== SAMPLE ENDPOINTS ====================
 	// Register the GET /api/hello endpoint.

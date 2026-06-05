@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+// PartItem represents a single part added to the chat session context.
+type PartItem struct {
+	PartID   uint   `json:"part_id"`
+	Name     string `json:"name"`
+	Quantity int    `json:"quantity"`
+}
+
 // ChatSession represents a conversation between a user and the API assistant.
 // It maps to the "chat_sessions" tbale in the SQLite database.
 type ChatSession struct {
@@ -23,6 +30,9 @@ type ChatSession struct {
 
 	// VehicleYear is the manufacturing year of the vehicle.
 	VehicleYear string `json:"vehicle_year"`
+
+	// Parts stores a JSON stringified array of PartItem structs.
+	Parts string `gorm:"type:text" json:"parts"`
 
 	// CreatedAt is the timestamp when the session was created.
 	CreatedAt time.Time `json:"created_at"`

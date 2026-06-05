@@ -42,6 +42,7 @@ type n8nRequest struct {
 		Model string `json:"model"`
 		Year  string `json:"year"`
 	} `json:"vehicle"`
+	Parts []dto.PartItemDTO `json:"parts,omitempty"`
 }
 
 // n8nResponse represents the expected JSON response from the n8n webhook.
@@ -76,11 +77,20 @@ func NewChatService(repo repository.ChatRepository, n8nURL string) ChatService {
 
 // CreateSession initializes a new chat session in the database.
 func (s *chatServiceImpl) CreateSession(req *dto.CreateChatSessionsRequest) (*dto.ChatSessionResponse, error) {
+	partsJSON := "[]"
+	if len(req.Parts) > 0 {
+		bytes, err := json.Marshal(req.Parts)
+		if err == nil {
+			partsJSON = string(bytes)
+		}
+	}
+
 	session := &models.ChatSession{
 		Status:       "need_info",
 		VehicleBrand: req.VehicleBrand,
 		VehicleModel: req.VehicleModel,
 		VehicleYear:  req.VehicleYear,
+		Parts:        partsJSON,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}
@@ -134,6 +144,12 @@ func (s *chatServiceImpl) SendMessage(sessionID uint, req *dto.SendChatMessageRe
 	payload.Vehicle.Brand = session.VehicleBrand
 	payload.Vehicle.Model = session.VehicleModel
 	payload.Vehicle.Year = session.VehicleYear
+
+	if session.Parts != "" && session.Parts != "[]" {
+		var parts []dto.PartItemDTO
+		_ = json.Unmarshal([]byte(session.Parts), &parts)
+		payload.Parts = parts
+	}
 
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
@@ -199,6 +215,12 @@ func (s *chatServiceImpl) sessionToResponse(session *models.ChatSession) dto.Cha
 		VehicleModel: session.VehicleModel,
 		VehicleYear:  session.VehicleYear,
 		CreatedAt:    session.CreatedAt.Format(time.RFC3339),
+	}
+
+	if session.Parts != "" && session.Parts != "[]" {
+		var parts []dto.PartItemDTO
+		_ = json.Unmarshal([]byte(session.Parts), &parts)
+		response.Parts = parts
 	}
 
 	// Convert associated messages if they exist.
