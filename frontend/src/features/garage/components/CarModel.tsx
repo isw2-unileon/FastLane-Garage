@@ -1,6 +1,7 @@
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { useMemo, useEffect } from 'react';
+import { ThreeEvent } from '@react-three/fiber'; // 1. Importamos el tipo correcto para el evento
 
 interface CarModelProps {
   selectedZone: string | null;
@@ -10,7 +11,7 @@ interface CarModelProps {
 export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) {
   const { scene } = useGLTF('/src/assets/models/coche.glb');
 
-  // 1. Configuración de los nuevos materiales con corrección de Z-Buffer (depthWrite)
+  // Configuración de los nuevos materiales con corrección de Z-Buffer (depthWrite)
   const materials = useMemo(() => {
     // Material base de superficie (cian semi-transparente)
     const surfaceMaterialCyan = new THREE.MeshStandardMaterial({
@@ -19,8 +20,8 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
       opacity: 0.4,
       blending: THREE.AdditiveBlending,
       wireframe: false,
-      depthWrite: false,             // 🌟 Evita que las caras delanteras oculten las traseras
-      side: THREE.DoubleSide,        // 🌟 Renderiza el interior y exterior de la chapa
+      depthWrite: false,             
+      side: THREE.DoubleSide,        
     });
 
     // Material de wireframe base (cian) para superponer encima
@@ -28,15 +29,15 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
       color: new THREE.Color('#22d3ee'),
       wireframe: true,
       transparent: true,
-      opacity: 0.10,                 // Más tenue para no saturar la vista
-      depthWrite: false,             // 🌟 Evita parpadeos en las aristas traseras
+      opacity: 0.10,                 
+      depthWrite: false,             
     });
 
     // Material de superficie interactiva (naranja con más cuerpo/opacidad)
     const surfaceMaterialOrange = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#ff5900'),
       transparent: true,
-      opacity: 0.7,                  // Más sólido para que se distingan las ruedas
+      opacity: 0.7,                  
       blending: THREE.AdditiveBlending,
       wireframe: false,
       depthWrite: false,
@@ -58,7 +59,7 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
       transparent: true,
       opacity: 0.8,
       wireframe: false,
-      side: THREE.DoubleSide,        // Mantenemos DoubleSide para consistencia de click
+      side: THREE.DoubleSide,        
     });
 
     return {
@@ -70,7 +71,7 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
     };
   }, []);
 
-  // 2. Duplicación de mallas: Creamos grupos con Capa Sólida + Capa de Líneas
+  // Duplicación de mallas: Creamos grupos con Capa Sólida + Capa de Líneas
   const processedScene = useMemo(() => {
     const clone = scene.clone();
     const meshesToReplace: { child: THREE.Mesh; group: THREE.Group }[] = [];
@@ -79,7 +80,7 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
         const group = new THREE.Group();
-        group.name = mesh.name;      // Preservamos el nombre para los eventos de click
+        group.name = mesh.name;      
 
         // Creamos los clones geométricos independientes
         const surfaceMesh = new THREE.Mesh(mesh.geometry);
@@ -111,7 +112,7 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
     return clone;
   }, [scene, materials]);
 
-  // 3. Actualizador de estado visual dinámico al seleccionar una zona activa
+  // Actualizador de estado visual dinámico al seleccionar una zona activa
   useEffect(() => {
     processedScene.traverse((child) => {
       if (child instanceof THREE.Group && child.name.toLowerCase().endsWith('_inter')) {
@@ -134,7 +135,8 @@ export default function CarModel({ selectedZone, onSelectZone }: CarModelProps) 
       object={processedScene}
       scale={1.6}
       position={[0, 0, 0]}
-      onClick={(e: any) => {
+      // 2. Aquí cambiamos 'any' por 'ThreeEvent<MouseEvent>'
+      onClick={(e: ThreeEvent<MouseEvent>) => {
         e.stopPropagation(); // Evita que el click atraviese el coche y toque el suelo
         
         // Comprobamos si lo que hemos tocado pertenece a un grupo interactivo

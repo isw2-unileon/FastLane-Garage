@@ -3,7 +3,7 @@ import Header from './components/layout/Header';
 import Scene3D from './features/garage/components/Scene3D';
 import Dashboard from './features/parts/components/Dashboard';
 import AnalyticsView from './features/parts/components/AnalyticsView';
-import ChatView from './features/parts/components/ChatView'; // 👈 Importamos la nueva vista del chat
+import ChatView from './features/parts/components/ChatView'; 
 
 const ELECTRICAL_ACCESSORIES = [
   { id: 'elec-1', name: 'Módulo Ambient Light RGB' },
@@ -24,7 +24,7 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
-  // 🧭 CONTROL DE RUTAS AMPLIADO: 'garage' | 'analytics' | 'chat'
+  
   const [view, setView] = useState<'garage' | 'analytics' | 'chat'>('garage');
 
   const addToCart = (id: string, name: string) => {
@@ -36,7 +36,7 @@ export default function App() {
     setCart(cart.filter(item => item.id !== id));
   };
 
-  // 🚀 LOGICA DE ENVIO AL ASESOR: Ahora limpia el carro y salta a la pantalla de Chat
+  
   const handleSendToAdvisor = () => {
     setCart([]);
     setIsCartOpen(false);
@@ -95,7 +95,7 @@ export default function App() {
         )}
 
         {view === 'chat' && (
-          /* 💬 RUTA DEL CHAT CON BOTÓN INTERNO PARA REGRESAR AL GARAJE */
+          
           <ChatView onBackToGarage={() => setView('garage')} />
         )}
 

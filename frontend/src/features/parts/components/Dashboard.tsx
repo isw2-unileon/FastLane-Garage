@@ -53,7 +53,7 @@ export default function Dashboard({ selectedZone, onAddToCart, onRemoveFromCart,
   };
 
   return (
-    // Quitamos h-full y flex-col restrictivos. Dejamos que el componente ocupe su espacio natural (p-6)
+    
     <div className="w-full bg-slate-900/40 backdrop-blur-md border-t border-slate-800 p-6 flex flex-col gap-4">
       
       {/* Cabecera del catálogo */}
@@ -71,7 +71,7 @@ export default function Dashboard({ selectedZone, onAddToCart, onRemoveFromCart,
         </span>
       </div>
 
-      {/* 🚀 Las tarjetas se renderizan completas y expanden el alto de toda la web */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {currentServices.map((service) => {
           const isAdded = cartItems.some(item => item.id === service.id);
