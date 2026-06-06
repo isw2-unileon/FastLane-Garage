@@ -1,4 +1,3 @@
-import React from 'react';
 import { TrendingUp, Clock, Package, CheckCircle2 } from 'lucide-react';
 
 const MOST_REQUESTED_SERVICES = [

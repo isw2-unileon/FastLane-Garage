@@ -1,4 +1,3 @@
-import React from 'react';
 import { ShoppingCart, LayoutGrid, BarChart3 } from 'lucide-react';
 
 interface HeaderProps {
