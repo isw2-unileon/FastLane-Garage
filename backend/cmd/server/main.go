@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/config"
 	"github.com/isw2-unileon/proyect-scaffolding/backend/internal/database"
@@ -73,6 +74,20 @@ func main() {
 
 	// Attach middleware to log HTTP requests and recover from panics.
 	r.Use(gin.Logger(), gin.Recovery())
+
+	// ====================== CORS MIDDLEWARE ======================
+	// This allows the React frontend (running on a different port) to access the API.
+	corsConfig := cors.DefaultConfig()
+	if cfg.CORSAllowOrigin == "*" {
+		corsConfig.AllowAllOrigins = true
+	} else {
+		corsConfig.AllowOrigins = []string{cfg.CORSAllowOrigin}
+	}
+
+	corsConfig.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"}
+	corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+
+	r.Use(cors.New(corsConfig))
 
 	// Register the health check endpoint.
 	// This endpoint is used by load balancers and monitoring systems
