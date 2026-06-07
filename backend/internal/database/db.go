@@ -34,6 +34,8 @@ func Migrate(db *gorm.DB) error {
 		&models.Part{},
 		&models.Order{},
 		&models.OrderItem{},
+		&models.ChatSession{},
+		&models.ChatMessage{},
 	); err != nil {
 		return fmt.Errorf("failed to migrate database: %w", err)
 	}
