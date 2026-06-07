@@ -42,7 +42,7 @@ export const GARAGE_SERVICES: ServiceItem[] = [
 
 // --- AÑADE ESTO ABAJO ---
 // Esto es lo que conecta el Frontend con tu Backend en Go
-const API_URL = "http://localhost:8080/api";
+const API_URL = "/api";
 
 export const chatApi = {
   createSession: async (vehicleData: VehicleSessionData) => {
