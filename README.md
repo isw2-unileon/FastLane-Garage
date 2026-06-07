@@ -6,39 +6,62 @@ A complete full-stack application for managing automotive parts and customer ord
 
 ### Backend (Go + Gin + GORM)
 
-✅ **Parts Management**
+✅ **Parts & Order Management**
 
-- CRUD operations for car parts
-- Filtering by car zone
-- Full-text search by part name
-- Price management
-- Image URLs support
+- CRUD operations for car parts with filtering (by car zone) and full-text search.
+- Complete order lifecycle (pending -> processing -> completed).
+- Order items with quantity, unit pricing, and automatic total price calculation.
+- Customer email validation and order status tracking.
 
-✅ **Order Management**
+✅ **AI Chatbot Integration**
 
-- Complete order lifecycle (pending -> processing -> completed)
-- Order items with quantity and unit pricing
-- Customer email validation
-- Order status tracking
-- Automatic total price calculation
+- Automated technical assistant powered by n8n webhooks.
+- Session management (creation and history retrieval).
+- Persistent chat message storage linking users to the AI's responses.
 
-✅ **Architecture**
+✅ **System Analytics**
 
-- Clean architecture (Handlers -> Service -> Repository)
-- Dependency injection
-- Interface-based design for testability
-- Comprehensive unit tests with mocks
-- Error handling with context wrapping
+- Comprehensive stats tracking (revenue, total orders, parts count, etc.).
 
-✅ **Quality**
+✅ **Architecture & Quality**
 
-- 100% test coverage for service layer
-- Go linters (golangci-lint)
-- Structured logging with slog
-- Type-safe DTOs with validation
-- GORM with SQLite database
+- Clean architecture (Handlers -> Service -> Repository).
+- Dependency injection and interface-based design for testability.
+- Comprehensive unit tests with mocks (100% test coverage for the service layer).
+- Go linters (golangci-lint), structured logging with `slog`, and type-safe DTOs.
+- SQLite database configured via GORM.
 
 ### Frontend (React + Three + TypeScript + Vite)
+
+✅ **Core Architecture (React & TypeScript)**
+
+- **React**: Main UI library handling modular component creation, global state management (e.g., cart items, active views), and efficient interface rendering.
+- **TypeScript**: Strict static typing across the client. Defines precise interfaces (like `HeaderProps` or `ChatViewProps`) to guarantee that frontend data payloads sync perfectly with backend expectations.
+
+✅ **Interactive 3D Digital Twin (Three.js)**
+
+- Renders an immersive 3D digital twin of the vehicle (`coche.glb`) and environment.
+- Features fully interactive camera controls (orbit, rotate, zoom).
+- **Dynamic Interaction**: Users can click directly on car meshes to dynamically extract specific car zone tags for part filtering.
+
+✅ **Modern UI & Aesthetics (Tailwind CSS & Lucide)**
+
+- **Tailwind CSS**: Drives the responsive, dark industrial aesthetic. Controls scroll flows, Grid/Flexbox alignments, and neon glow/animation effects for the environment.
+- **Lucide React**: Supplies clean vector iconography throughout the interface (e.g., `ShoppingCart`, `BarChart3`, `Bot`, `Send`).
+
+✅ **Build & Dev Environment (Vite)**
+
+- Ultra-fast bundler and development server.
+- Automatically manages the reverse proxy, seamlessly redirecting `/api` requests from the client port (`5173`) to the Go backend server (`8080`).
+
+### AI & Automation Workflow (Ovidium's Engine)
+
+✅ **Intelligent Chatbot Integration**
+
+- **n8n (Workflow Orchestration):** Acts as the central nervous system. It receives webhook triggers from the Go backend containing the user's message and vehicle context, orchestrating the entire logical flow.
+- **SerpApi (Real-Time Search):** Before generating an answer, n8n queries SerpApi to fetch real-time data from the web. This allows the bot to dynamically check up-to-date part compatibilities, technical manuals, and vehicle specifications.
+- **DeepSeek API (LLM Engine):** The core intelligence of the assistant. It ingests the user's prompt alongside the real-time context gathered by SerpApi to generate accurate, technical, and context-aware responses.
+- **Persistent Memory:** The Go backend stores all sessions and messages in the SQLite database, creating a seamless history log.
 
 ---
 
@@ -46,45 +69,56 @@ A complete full-stack application for managing automotive parts and customer ord
 
 ```text
 ├── backend/                    # Go API Server
-│   ├── cmd/server/            # Entry point
-│   │   └── main.go            # Server initialization
+│   ├── cmd/server/             # Entry point (main.go)
 │   └── internal/
-│       ├── config/            # Configuration management
-│       ├── database/          # Database migrations & seeding
-│       ├── models/            # Domain models (Part, Order, OrderItem)
-│       ├── dto/               # Data transfer objects with validation
-│       ├── repository/        # Data access layer (PartsRepository, OrdersRepository)
-│       ├── service/           # Business logic (PartsService, OrdersService)
-│       ├── handlers/          # HTTP handlers (Parts, Orders, Helpers)
+│       ├── config/             # CORS and Environment configuration
+│       ├── database/           # Database migrations (SQLite) & seeding
+│       ├── models/             # Domain models (Part, Order, ChatSession, ChatMessage)
+│       ├── dto/                # Data transfer objects with validation
+│       ├── repository/         # Data access layer
+│       ├── service/            # Business logic (Parts, Orders, Chat, Stats)
+│       └── handlers/           # Gin HTTP handlers
 │
 ├── frontend/                   # React + TypeScript + Vite
-│   └── src/                   # React components (to be implemented)
+│   ├── src/
+│   │   ├── assets/models/      # 3D .glb models (car, scenario, map)
+│   │   ├── components/layout/  # Global layout (Header, etc.)
+│   │   └── features/
+│   │       ├── garage/         # 3D Scene components (Scene3D, CarModel)
+│   │       └── parts/          # Dashboard, Analytics, ChatView, API services
+│   └── index.html
 │
-├── e2e/                       # Playwright E2E tests
-│   └── tests/
-│
-├── docs/                      # Documentation
-│   ├── getting-started.md     # Setup guide
-│   ├── golang.md              # Go best practices
-│   ├── monorepo.md            # Monorepo explanation
-│   └── adr/                   # Architecture Decision Records
-│
-└── .github/workflows/         # CI/CD pipelines
+├── e2e/                        # Playwright E2E tests
+├── docs/                       # Documentation & Architecture Decision Records
+└── .github/workflows/          # CI/CD pipelines (Backend, Frontend, CodeQL, E2E)
 ```
 
 ## 📊 API Endpoint
 
-### Parts Endpoints
+### Parts & Orders Endpoints
 
-| Method   | Path             | Description     | Query Parameters         |
-| -------- | ---------------- | --------------- | ------------------------ |
-| `GET`    | `/api/parts`     | List all parts  | `?zone=motor&name=Motor` |
-| `GET`    | `/api/parts/:id` | Get part by ID  | -                        |
-| `POST`   | `/api/parts`     | Create new part | -                        |
-| `PUT`    | `/api/parts/:id` | Update part     | -                        |
-| `DELETE` | `/api/parts/:id` | Delete part     | -                        |
+| Method   | Path                     | Description         | Query Parameters                         |
+| -------- | ------------------------ | ------------------- | ---------------------------------------- |
+| `GET`    | `/api/parts`             | List all parts      | `?zone=motor&name=Motor`                 |
+| `GET`    | `/api/parts/:id`         | Get part by ID      | -                                        |
+| `POST`   | `/api/parts`             | Create new part     | -                                        |
+| `PUT`    | `/api/parts/:id`         | Update part         | -                                        |
+| `DELETE` | `/api/parts/:id`         | Delete part         | -                                        |
+| `GET`    | `/api/orders`            | List all orders     | `?status=pending&email=user@example.com` |
+| `GET`    | `/api/orders/:id`        | Get order by ID     | -                                        |
+| `POST`   | `/api/orders`            | Create new order    | -                                        |
+| `PUT`    | `/api/orders/:id/status` | Update order status | -                                        |
+| `DELETE` | `/api/orders/:id`        | Delete order        | -                                        |
 
-**Examples:**
+### AI Chat Endpoints
+
+| Method | Path                              | Description                  | Query Parameters |
+| ------ | --------------------------------- | ---------------------------- | ---------------- |
+| `POST` | `/api/chat/sessions`              | Create a new AI chat session | -                |
+| `GET`  | `/api/chat/sessions/:id`          | Get chat session history     | -                |
+| `POST` | `/api/chat/sessions/:id/messages` | Send message to the AI bot   | -                |
+
+**Parts examples:**
 
 ```bash
 # Get all parts
@@ -100,17 +134,7 @@ curl http://localhost:8080/api/parts?name=Motor
 curl http://localhost:8080/api/parts/1
 ```
 
-### Orders Endpoints
-
-| Method   | Path                     | Description         | Query Parameters                         |
-| -------- | ------------------------ | ------------------- | ---------------------------------------- |
-| `GET`    | `/api/orders`            | List all orders     | `?status=pending&email=user@example.com` |
-| `GET`    | `/api/orders/:id`        | Get order by ID     | -                                        |
-| `POST`   | `/api/orders`            | Create new order    | -                                        |
-| `PUT`    | `/api/orders/:id/status` | Update order status | -                                        |
-| `DELETE` | `/api/orders/:id`        | Delete order        | -                                        |
-
-**Examples:**
+**Orders examples:**
 
 ```bash
 # Get all orders
@@ -132,6 +156,17 @@ curl -X POST http://localhost:8080/api/orders \
       {"part_id": 1, "quantity": 2},
       {"part_id": 3, "quantity": 1}
     ]
+  }'
+```
+
+**Chat message example:**
+
+```bash
+// Sending a chat message
+curl -X POST http://localhost:8080/api/chat/sessions/1/messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "¿Son compatibles las pastillas de freno con un Audi A4?"
   }'
 ```
 
@@ -193,6 +228,7 @@ make build-frontend
 The project includes comprehensive unit tests for all service layers:
 
 ```bash
+# Run backend tests
 go test -v -race ./backend/internal/service/
 ```
 
@@ -251,6 +287,30 @@ CREATE TABLE order_items (
 );
 ```
 
+### Chat Integration Table
+
+```sql
+CREATE TABLE chat_sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  status TEXT,
+  vehicle_brand TEXT,
+  vehicle_model TEXT,
+  vehicle_year TEXT,
+  parts TEXT,
+  created_at DATETIME,
+  updated_at DATETIME
+);
+
+CREATE TABLE chat_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  session_id INTEGER,
+  role TEXT,
+  content TEXT,
+  created_at DATETIME,
+  FOREIGN KEY (session_id) REFERENCES chat_sessions(id)
+);
+```
+
 ---
 
 ## 🏛️ Architecture
@@ -267,6 +327,20 @@ HTTP Request
 [Repository]      ← Data access & persistence
     ↓
 [Database]        ← SQLite (GORM)
+```
+
+```
+[Frontend React App]
+        ↓↑
+[Go HTTP Handlers]    → Validates request & routes to Service
+        ↓↑
+[Go Service Layer]    → Calls Database Repo AND triggers AI Webhook
+        ↓↑
+  +-----------+
+  |  n8n Node |       ← Orchestrates the AI logical flow
+  +-----------+
+    ↙       ↘
+[SerpApi]  [DeepSeek] ← SerpApi fetches web context, DeepSeek generates the response
 ```
 
 ### Design Patterns Used
@@ -399,11 +473,11 @@ This project is part of the INSO2 course at Universidad de León.
 **Backend Development:**
 
 - Jorge (Go, Gin, GORM, Database Design, Tests)
-- Ovidium
+- Ovidium (AI Workflow Integration; n8n orchestration, SerpApi real-time search, DeepSeek LLM automation)
 
 **Frontend Development:**
 
-- Rodrigo
+- Rodrigo (React, Three.js 3D Garage, ChatUI, Tailwind)
 
 ---
 
