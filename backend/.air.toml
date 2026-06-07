@@ -13,6 +13,10 @@ tmp_dir = "tmp"
   send_interrupt = false
   stop_on_error = true
 
+[env]
+  CORS_ALLOW_ORIGIN = "http://localhost:5173"
+  N8N_WEBHOOK_URL = "http://localhost:5678/webhook/fastlane-input"
+  
 [log]
   time = false
 
