@@ -116,7 +116,7 @@ func TestSendMessage(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		// Mock n8n response payload
-		w.Write([]byte(`{
+		_, _ = w.Write([]byte(`{
 			"reply": "I am a mocked AI",
 			"status": "ready",
 			"vehicle": {"brand": "Tesla", "model": "Model 3", "year": "2023"}
